@@ -6,11 +6,12 @@ import predict
 def parse():
     data = []
     labels = []
+    ids = []
 
     with open("data.csv") as f:
         for line in f:
             parts = line.strip().split(",")
-            _id = parts[0]
+            ids.append(parts[0])
             label = 1 if parts[1] == "M" else 0
             features = [float(v) for v in parts[2:]]
             data.append(features)
@@ -30,14 +31,15 @@ def parse():
     split = int(0.8 * len(X_norm))
     X_train, X_test = X_norm[:split], X_norm[split:]
     y_train, y_test = y[:split], y[split:]
-    return X_train, X_test, y_train, y_test
+    ids = ids[split:]
+    return X_train, X_test, y_train, y_test, ids
 
 
 
 
 
 if __name__ == "__main__":
-    X_train, X_test, y_train, y_test = parse()
+    X_train, X_test, y_train, y_test, ids = parse()
 
     # Check if a command line argument was supplied
     if len(sys.argv) < 2:
@@ -50,7 +52,7 @@ if __name__ == "__main__":
         train.train(X_train, y_train)
     elif mode == "and_predict":
         # Call your prediction logic here instead of training
-        predict.predict(X_test, y_test)
+        predict.predict(X_test, ids)
     else:
         print(f"Unknown mode: {mode}")
 
