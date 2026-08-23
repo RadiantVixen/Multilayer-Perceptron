@@ -1,6 +1,7 @@
+import sys
 import numpy as np
 import train
-
+import predict
 
 def parse():
     data = []
@@ -24,10 +25,6 @@ def parse():
     std = X.std(axis=0)
     X_norm = (X - mean) / std
 
-    a = np.array([[1, 2, 3], [8, 9, 7]])
-    mean = a.mean(axis=0)
-    std = a.std(axis=0)
-    X_norm = (a - mean) / std
 
 
     split = int(0.8 * len(X_norm))
@@ -37,7 +34,6 @@ def parse():
 
 
 
-import sys
 
 
 if __name__ == "__main__":
@@ -50,10 +46,12 @@ if __name__ == "__main__":
 
     mode = sys.argv[1]
 
-    if mode == "train":
+    if mode == "and_train":
         train.train(X_train, y_train)
-    elif mode == "predict":
+    elif mode == "and_predict":
         # Call your prediction logic here instead of training
         predict.predict(X_test, y_test)
     else:
         print(f"Unknown mode: {mode}")
+
+
