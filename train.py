@@ -6,7 +6,7 @@ T = 1
 L1_weights = np.random.randn(16, 30) * np.sqrt(1.0 / 30)
 L2_weights = np.random.randn(4, 16) * np.sqrt(1.0 / 16)
 L3_weights = np.random.randn(2, 4) * np.sqrt(1.0 / 4)
-Lr = 0.1
+Lr = 0.001
 Epochs = 100
 
 L1_biases = np.zeros(16)
@@ -21,78 +21,66 @@ l4 = [0] * 2
 
 def crossEntropy(m, b, lable):
     Cm = m - lable
-    Cb = b - lable
+    Cb = b - (1 - lable)
     return Cm, Cb
 
 
 def softMax(l4):
-    total = math.exp(l4[0] / T) + math.exp(l4[1] / T)
-    m = math.exp(l4[0] / T) / total
-    b = math.exp(l4[1] / T) / total
+    logits = np.exp(np.array(l4) / T)
+    total = np.sum(logits)
+    m = logits[0] / total
+    b = logits[1] / total
     return m, b
 
 
 def activation(z):
-    return 1 / (1 + np.exp(-z))
+    z = np.clip(z, -500, 500)
+    return 1.0 / (1.0 + np.exp(-z))
 
 
-def sigmoidDerevitave(layer, weights, biases):
-    result = []
+def sigmoidDerevitave(a):
+    return activation(a) * (1 - activation(a))
 
-    for i in range(0, len(weights)):
-        z = sum(layer * weights[i]) + biases[i]
-        neural = activation(z) * (1 - activation(z))
-        result.append(neural)
-    
-    return result
-
-
-
-def derivative(delta, Dz, weights):
-    gradiant = np.dot(weights.T, delta) * Dz
-    return  gradiant
+def ft_gradient(delta, a, weights):
+    gradient = np.dot(weights.T, delta) * sigmoidDerevitave(a)
+    return  gradient
 
 
 def backPropagation(Cm, Cb, feature):
     global L1_weights, L2_weights, L3_weights, L1_biases, L2_biases, L3_biases
 
-    gradiant = np.array([Cm, Cb])
-    print(gradiant)
+    gradient = np.array([Cm, Cb])
 
-    L3_biases -= Lr * gradiant
-    gradiant = derivative(gradiant, sigmoidDerevitave(l2, L2_weights, L2_biases),  L3_weights)
-    L3_weights -= Lr * (gradiant * l3)
+    L3_biases -= Lr * gradient
+    L3_weights -= Lr * np.outer(gradient, l3)
+    gradient = ft_gradient(gradient, l3,  L3_weights)
     
-    L2_biases -= Lr * gradiant
-    gradiant = derivative(gradiant, sigmoidDerevitave(feature, L1_weights, L1_biases), L2_weights)
-    L2_weights -= Lr * (gradiant * l2)
+    L2_biases -= Lr * gradient
+    L2_weights -= Lr * np.outer(gradient, l2)
+    gradient = ft_gradient(gradient, l2, L2_weights)
 
-    L1_biases -= Lr * gradiant
-    gradiant = derivative(gradiant, feature, L1_weights)
-    L1_weights -= Lr * (gradiant * feature)
+    L1_biases -= Lr * gradient
+    L1_weights -= Lr * np.outer(gradient, feature)
+    # gradient = ft_gradient(gradient, feature, L1_weights)
 
 
 def forwardPropagation(sample):
     global l2, l3, l4
 
-    for i in range(0, len(L1_weights)):
-        z = np.dot(list(sample), L1_weights[i]) + L1_biases[i]
-        neural = activation(z)
-        l2[i] = neural
+    z = np.dot(L1_weights, sample) + L1_biases
+    neural = activation(z)
+    l2 = neural
 
     
-    for i in range(0, len(L2_weights)):
-        z = np.dot(l2, L2_weights[i]) + L2_biases[i]
-        neural = activation(z)
-        l3[i] = neural
+    z = np.dot(L2_weights, l2) + L2_biases
+    neural = activation(z)
+    l3 = neural
 
-
-    for i in range(0, len(L3_weights)):
-        z = np.dot(l3, L3_weights[i]) + L3_biases[i]
-        l4[i] = z
+    z = np.dot(L3_weights, l3) + L3_biases
+    l4 = z
 
     M, B = softMax(l4)
-    # print(l4)
+    print(M, B)
     return M, B
 
 
@@ -116,11 +104,11 @@ def save_parameters(filepath="parameters.json"):
 
 def train(features, lables):
 
-    # for epoch in range(0, Epochs):
-    for i in  range(0, len(features)):
-        M, B = forwardPropagation(features[i])
-        Cm, Cb,  = crossEntropy(M, B, lables[i])
-        backPropagation(Cm, Cb, features[i])
+    for epoch in range(0, Epochs):
+        for i in  range(0, len(features)):
+            M, B = forwardPropagation(features[i])
+            Cm, Cb,  = crossEntropy(M, B, lables[i])
+            backPropagation(Cm, Cb, features[i])
 
     save_parameters()
 
