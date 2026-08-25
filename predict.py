@@ -32,13 +32,24 @@ def forwardPropagation(sample, weights_and_biases):
     return M, B
 
 
+def binary_cross_entropy(probabilities, labels):
+    epsilon = 1e-12
+    probabilities = np.clip(probabilities, epsilon, 1 - epsilon)
+    return -np.mean(
+        labels * np.log(probabilities)
+        + (1 - labels) * np.log(1 - probabilities)
+    )
+
+
 def predict(features, ids, y, filepath="parameters.json"):
     params = load_parameters(filepath)
 
     correct = 0
+    malignant_probabilities = []
 
     for i in range(len(features)):
         M, B = forwardPropagation(features[i], params)
+        malignant_probabilities.append(M)
 
         if M > B:
             prediction = 1
@@ -55,7 +66,10 @@ def predict(features, ids, y, filepath="parameters.json"):
         if prediction == y[i]:
             correct += 1
 
+    loss = binary_cross_entropy(np.array(malignant_probabilities), y)
     accuracy = correct / len(y) * 100
 
+    print(f"Binary cross-entropy: {loss:.4f}")
     print(f"\nAccuracy: {accuracy:.2f}%")
     print(f"Correct predictions: {correct}/{len(y)}")
+
