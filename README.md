@@ -9,17 +9,17 @@ A math-first, highly optimized implementation of a feedforward artificial neural
 ### 1. 📈 Dynamic Loss & Accuracy Convergence
 *Watch the live training and validation metrics converge side-by-side epoch-by-epoch. The validation accuracy smoothly climbs as binary cross-entropy loss drops toward zero.*
 
-![Learning Curves Convergence](learning_curves.gif)
+![Learning Curves Convergence](assets/learning_curves.gif)
 
 ### 2. 🌀 Decision Boundary warping (PCA Projection)
 *This visualization projects the 30-dimensional feature space onto the first two Principal Components (PCA). You can see the neural network's non-linear decision boundary shift, expand, and bend in real time to perfectly isolate Malignant (red) from Benign (blue) samples.*
 
-![Decision Boundary Evolution](decision_boundary.gif)
+![Decision Boundary Evolution](assets/decision_boundary.gif)
 
 ### 3. 🕸️ Neural Network Signals & Backprop Pulsing
 *An animated block-diagram tracing the mechanics of our feedforward and backpropagation cycles. Witness the forward activation flow (green pulses), the Softmax decision boundary classification, and the backpropagating error gradients (crimson pulses) traversing the weights.*
 
-![Neural Network Activations](network_activations.gif)
+![Neural Network Activations](assets/network_activations.gif)
 
 ---
 
